@@ -415,7 +415,7 @@ class YaMetrika
     private function combineData($column, $array)
     {
         $queryColumn = array_map(function($key) {
-            return str_replace(['ym:s:', 'ym:pv:', 'ym:ad:'], '', $key);
+            return str_replace(['ym:s:', 'ym:pv:', 'ym:ad:', 'ym:sp:'], '', $key);
         }, $this->data['query'][$column]);
 
         return array_combine($queryColumn, $array);
@@ -431,7 +431,7 @@ class YaMetrika
      */
     private function query($params)
     {
-        $url = $this->endPoint . '?' . http_build_query(array_merge($params, ['ids' => $this->counterId, 'oauth_token' => $this->token]), null, '&');
+        $url = $this->endPoint . '?' . http_build_query(array_merge($params, ['ids' => $this->counterId]), null, '&');
 
         try {
             $client = new GuzzleClient($this->getHttpClientParams());
@@ -466,8 +466,15 @@ class YaMetrika
      */
     private function getHttpClientParams()
     {
-        $params = [];
-        if ($this->proxy) $params[RequestOptions::PROXY] = $this->proxy;
+        $params = [
+            RequestOptions::HEADERS => [
+                "Authorization" => "OAuth {$this->token}"
+            ]
+        ];
+
+        if ($this->proxy) {
+            $params[RequestOptions::PROXY] = $this->proxy;
+        }
 
         return $params;
     }
